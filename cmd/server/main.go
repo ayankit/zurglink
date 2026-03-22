@@ -6,13 +6,13 @@ import (
 	"net/http"
 
 	"github.com/ayankit/clog"
-	"github.com/ayankit/zurg-syms/internal/config"
-	"github.com/ayankit/zurg-syms/internal/organise"
-	"github.com/ayankit/zurg-syms/internal/tmdb"
+	"github.com/ayankit/zurglink/internal/config"
+	"github.com/ayankit/zurglink/internal/organise"
+	"github.com/ayankit/zurglink/internal/tmdb"
 )
 
-// WebhookRequest expects JSON like: {"relative_path": "/shows/The.Last.of.Us.S01E01.1080p.mkv"}
-type WebhookRequest struct {
+// RequestData expects JSON like: {"relative_path": "/shows/The.Last.of.Us.S01E01.1080p.mkv"}
+type RequestData struct {
 	RelativePath string `json:"relative_path"`
 }
 
@@ -20,7 +20,7 @@ func main() {
 	clog.Init(clog.LevelDebug)
 	cfg, err := config.Load()
 	if err != nil {
-		log.Fatalf("Configuration error: %v", err)
+		clog.Fatal("Configuration load failed", clog.Err(err))
 	}
 
 	tmdbClient := tmdb.NewClient(cfg.TMDBToken)
@@ -31,7 +31,7 @@ func main() {
 			return
 		}
 
-		var req WebhookRequest
+		var req RequestData
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, "Bad request body", http.StatusBadRequest)
 			return
@@ -54,9 +54,10 @@ func main() {
 		w.Write([]byte("Processing started"))
 	})
 
-	log.Printf("Starting Symlink Organizer on port %s", cfg.Port)
-	log.Printf("Source: %s | Dest: %s", cfg.SourcePath, cfg.DestPath)
+	clog.Info("Starting ZurgLink...", "port", cfg.Port)
+	clog.Info("Path config:", "source", cfg.SourcePath, "destination", cfg.DestPath)
+	clog.Info("Jellyfin config:", "server", cfg.JFServer, "mountpath", cfg.JFMountPath)
 	if err := http.ListenAndServe(":"+cfg.Port, nil); err != nil {
-		log.Fatalf("Server failed: %v", err)
+		clog.Fatal("Server failed to start", clog.Err(err))
 	}
 }

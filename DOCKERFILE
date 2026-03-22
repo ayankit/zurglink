@@ -5,15 +5,15 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 # Build the binary statically
-RUN CGO_ENABLED=0 GOOS=linux go build -o zurg-syms ./cmd/server/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o zurglink ./cmd/server/main.go
 
 # Production Stage
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates tzdata
 WORKDIR /app
-COPY --from=builder /app/zurg-syms .
+COPY --from=builder /app/zurglink .
 
 # Expose the default port
 EXPOSE 8080
 
-CMD ["./zurg-syms"]
+CMD ["./zurglink"]

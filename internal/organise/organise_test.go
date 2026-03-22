@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ayankit/zurg-syms/internal/tmdb"
+	"github.com/ayankit/zurglink/internal/tmdb"
 )
 
 // mockTMDBResponse helps create a fake TMDB response for testing

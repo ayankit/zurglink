@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ayankit/zurg-syms/internal/ptn"
-	"github.com/ayankit/zurg-syms/internal/tmdb"
+	"github.com/ayankit/zurglink/internal/ptn"
+	"github.com/ayankit/zurglink/internal/tmdb"
 )
 
 // ProcessPath handles a directory or a single file recursively.
