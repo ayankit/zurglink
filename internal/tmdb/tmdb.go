@@ -10,15 +10,17 @@ import (
 )
 
 type Client struct {
-	Token string
-	cache map[string]*MediaInfo
-	mu    sync.Mutex
+	Token      string
+	HTTPClient *http.Client
+	cache      map[string]*MediaInfo
+	mu         sync.Mutex
 }
 
 func NewClient(token string) *Client {
 	return &Client{
-		Token: token,
-		cache: make(map[string]*MediaInfo),
+		Token:      token,
+		HTTPClient: http.DefaultClient,
+		cache:      make(map[string]*MediaInfo),
 	}
 }
 
@@ -87,7 +89,7 @@ func (c *Client) Search(title string, year int, isMovie bool) (*MediaInfo, error
 	req.Header.Add("Authorization", "Bearer "+c.Token)
 	req.Header.Add("Accept", "application/json")
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
