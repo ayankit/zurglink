@@ -121,18 +121,18 @@ func (m *Manager) processSingleFile(absolutePath string) error {
 	}
 
 	if parsed.IsMovie {
-		// Jellyfin Movie: Movies/Movie Name (2006) [tmdbid-123]/Movie Name (2006) [1080p].mkv
+		// Jellyfin Movie: movies/Movie Name (2006) [tmdbid-123]/Movie Name (2006) [1080p].mkv
 		movieFolder := fmt.Sprintf("%s%s [tmdbid-%d]", tmdbData.Title, yearStr, tmdbData.ID)
-		destDir = filepath.Join(m.DestPath, "Movies", movieFolder)
+		destDir = filepath.Join(m.DestPath, "movies", movieFolder)
 
 		destFileName := fmt.Sprintf("%s%s%s%s", tmdbData.Title, yearStr, resTag, ext)
 		destFile = filepath.Join(destDir, destFileName)
 
 	} else {
-		// Jellyfin TV: Shows/Show Name (2006) [tmdbid-123]/Season 01/Show Name (2006) S01E01 [1080p].mkv
+		// Jellyfin TV: shows/Show Name (2006) [tmdbid-123]/Season 01/Show Name (2006) S01E01 [1080p].mkv
 		showFolder := fmt.Sprintf("%s%s [tmdbid-%d]", tmdbData.Title, yearStr, tmdbData.ID)
 		seasonFolder := fmt.Sprintf("Season %02d", parsed.Season)
-		destDir = filepath.Join(m.DestPath, "Shows", showFolder, seasonFolder)
+		destDir = filepath.Join(m.DestPath, "shows", showFolder, seasonFolder)
 
 		destFileName := fmt.Sprintf("%s%s S%02dE%02d%s%s", tmdbData.Title, yearStr, parsed.Season, parsed.Episode, resTag, ext)
 		destFile = filepath.Join(destDir, destFileName)
