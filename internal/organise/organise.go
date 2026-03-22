@@ -62,7 +62,7 @@ func processSingleFile(base, absolutePath string, tmdbClient *tmdb.Client) error
 	var destDir, destFile string
 	resTag := ""
 	if parsed.Resolution != "" {
-		resTag = fmt.Sprintf(" [%s]", parsed.Resolution)
+		resTag = fmt.Sprintf(" - [%s]", parsed.Resolution)
 	}
 
 	ext := filepath.Ext(fileName)

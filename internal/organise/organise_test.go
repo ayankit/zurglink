@@ -64,7 +64,7 @@ func TestProcessPath_SingleMovie(t *testing.T) {
 	}
 
 	// Verify Symlink
-	expectedSymlink := filepath.Join(destDir, "Movies", "Inception (1999) [tmdbid-27205]", "Inception (1999) [1080p].mkv")
+	expectedSymlink := filepath.Join(destDir, "Movies", "Inception (1999) [tmdbid-27205]", "Inception (1999) - [1080p].mkv")
 	info, err := os.Lstat(expectedSymlink)
 	if err != nil {
 		t.Fatalf("Expected symlink not found at %s: %v", expectedSymlink, err)
@@ -107,7 +107,7 @@ func TestProcessPath_TVShow(t *testing.T) {
 	}
 
 	// Verify Symlink
-	expectedSymlink := filepath.Join(destDir, "Shows", "Breaking Bad (2008) [tmdbid-1396]", "Season 01", "Breaking Bad (2008) S01E01 [720p].mkv")
+	expectedSymlink := filepath.Join(destDir, "Shows", "Breaking Bad (2008) [tmdbid-1396]", "Season 01", "Breaking Bad (2008) S01E01 - [720p].mkv")
 	info, err := os.Lstat(expectedSymlink)
 	if err != nil {
 		t.Fatalf("Expected symlink not found at %s: %v", expectedSymlink, err)
