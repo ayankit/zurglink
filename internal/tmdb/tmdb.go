@@ -83,10 +83,19 @@ func (c *Client) Search(title string, year int, isMovie bool) (*MediaInfo, error
 			q.Add("first_air_date_year", fmt.Sprintf("%d", year))
 		}
 	}
+
+	// Quick check: v3 API keys are 32 chars, v4 Access Tokens are long JWTs
+	isAPIKey := len(c.Token) < 40
+	if isAPIKey {
+		q.Add("api_key", c.Token)
+	}
+
 	reqURL.RawQuery = q.Encode()
 
 	req, _ := http.NewRequest("GET", reqURL.String(), nil)
-	req.Header.Add("Authorization", "Bearer "+c.Token)
+	if !isAPIKey {
+		req.Header.Add("Authorization", "Bearer "+c.Token)
+	}
 	req.Header.Add("Accept", "application/json")
 
 	resp, err := c.HTTPClient.Do(req)

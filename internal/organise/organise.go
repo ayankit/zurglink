@@ -46,7 +46,7 @@ func (m *Manager) ProcessPath(relativePath string) error {
 
 	info, err := os.Stat(absolutePath)
 	if err != nil {
-		return fmt.Errorf("failed to stat: %w", err)
+		return err
 	}
 
 	// Paths that we need to send to Jellyfin for update

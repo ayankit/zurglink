@@ -49,7 +49,7 @@ func main() {
 		}
 
 		if req.Path == "" {
-			http.Error(w, "relative_path is required", http.StatusBadRequest)
+			http.Error(w, "path is required", http.StatusBadRequest)
 			return
 		}
 
