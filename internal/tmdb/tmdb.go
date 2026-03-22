@@ -5,14 +5,21 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
+	"sync"
 )
 
 type Client struct {
 	Token string
+	cache map[string]*MediaInfo
+	mu    sync.Mutex
 }
 
 func NewClient(token string) *Client {
-	return &Client{Token: token}
+	return &Client{
+		Token: token,
+		cache: make(map[string]*MediaInfo),
+	}
 }
 
 type tmdbResponse struct {
@@ -31,8 +38,34 @@ type MediaInfo struct {
 	Year  string
 }
 
+func sanitizeTitle(name string) string {
+	name = strings.ReplaceAll(name, "/", "-")
+	name = strings.ReplaceAll(name, "\\", "-")
+	name = strings.ReplaceAll(name, ":", " -")
+	name = strings.ReplaceAll(name, "?", "")
+	name = strings.ReplaceAll(name, "<", "")
+	name = strings.ReplaceAll(name, ">", "")
+	name = strings.ReplaceAll(name, "|", "")
+	name = strings.ReplaceAll(name, "\"", "")
+	name = strings.ReplaceAll(name, "*", "")
+	return strings.TrimSpace(name)
+}
+
 // Search searches for a TV show or Movie and returns the top result
 func (c *Client) Search(title string, year int, isMovie bool) (*MediaInfo, error) {
+	cacheKey := fmt.Sprintf("%s|%d|%t", title, year, isMovie)
+
+	// Check cache
+	c.mu.Lock()
+	if val, ok := c.cache[cacheKey]; ok {
+		c.mu.Unlock()
+		if val == nil {
+			return nil, fmt.Errorf("cached: no tmdb results found for %s", title)
+		}
+		return val, nil
+	}
+	c.mu.Unlock()
+
 	baseURL := "https://api.themoviedb.org/3/search/movie"
 	if !isMovie {
 		baseURL = "https://api.themoviedb.org/3/search/tv"
@@ -60,12 +93,19 @@ func (c *Client) Search(title string, year int, isMovie bool) (*MediaInfo, error
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("tmdb api error: %d", resp.StatusCode)
+	}
+
 	var result tmdbResponse
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, err
 	}
 
 	if len(result.Results) == 0 {
+		c.mu.Lock()
+		c.cache[cacheKey] = nil
+		c.mu.Unlock()
 		return nil, fmt.Errorf("no tmdb results found for %s", title)
 	}
 
@@ -85,9 +125,16 @@ func (c *Client) Search(title string, year int, isMovie bool) (*MediaInfo, error
 		officialYear = rawDate[:4]
 	}
 
-	return &MediaInfo{
+	info := &MediaInfo{
 		ID:    first.ID,
-		Title: officialTitle,
+		Title: sanitizeTitle(officialTitle),
 		Year:  officialYear,
-	}, nil
+	}
+
+	// Save to cache
+	c.mu.Lock()
+	c.cache[cacheKey] = info
+	c.mu.Unlock()
+
+	return info, nil
 }
