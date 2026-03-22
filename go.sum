@@ -1,5 +1,5 @@
-github.com/ayankit/clog v1.0.0 h1:UMw6j/68Rf+Kj6sNnXLmdNqq00mn0yN9gBX0R1fpYH4=
-github.com/ayankit/clog v1.0.0/go.mod h1:Q7GMB8nBwJJzxtkrU1bJu24/C9X5goIhuoUcDm1e1xo=
+github.com/ayankit/clog v1.1.0 h1:OPk3L0Nmh4qLlOufEsm03Phs6QMEGa3MVQPmW2QIKFw=
+github.com/ayankit/clog v1.1.0/go.mod h1:Q7GMB8nBwJJzxtkrU1bJu24/C9X5goIhuoUcDm1e1xo=
 github.com/davecgh/go-spew v0.0.0-20161028175848-04cdfd42973b h1:XxMZvQZtTXpWMNWK82vdjCLCe7uGMFXdTsJH0v3Hkvw=
 github.com/davecgh/go-spew v0.0.0-20161028175848-04cdfd42973b/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/pmezard/go-difflib v0.0.0-20151028094244-d8ed2627bdf0 h1:GD+A8+e+wFkqje55/2fOVnZPkoDIu1VooBWfNrnY8Uo=
