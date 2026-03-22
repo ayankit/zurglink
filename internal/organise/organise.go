@@ -79,13 +79,7 @@ func (m *Manager) ProcessPath(relativePath string) error {
 	}
 
 	// Notify jellyfin about changes
-	if m.jellyfin != nil {
-		if len(scanPaths) == 1 {
-			m.jellyfin.ScanPath(scanPaths[0])
-		} else if len(scanPaths) > 1 {
-			m.jellyfin.ScanPaths(scanPaths)
-		}
-	}
+	m.notifyJellyfin(scanPaths)
 
 	return nil
 }
@@ -151,6 +145,30 @@ func (m *Manager) processSingleFile(absolutePath string) error {
 
 	clog.Infof("Successfully organized: %s -> %s", absolutePath, filepath.Base(destFile))
 	return nil
+}
+
+func (m *Manager) notifyJellyfin(paths []string) {
+	if m.jellyfin == nil || len(paths) == 0 {
+		clog.Debug("Notify jellyfin skipped", "client", m.jellyfin, "pathCount", len(paths))
+		return
+	}
+
+	if len(paths) == 1 {
+		response, err := m.jellyfin.ScanPath(paths[0])
+		if err != nil {
+			clog.Warn("Failure in notifying jellyfin for update", clog.Err(err))
+			return
+		}
+		clog.Debug("Jellyfin notify path successful", "response", response)
+		return
+	}
+
+	response, err := m.jellyfin.ScanPaths(paths)
+	if err != nil {
+		clog.Warn("Failure in notifying jellyfin for bulk update", clog.Err(err))
+		return
+	}
+	clog.Debug("Jellyfin notify bulk path successful", "response", response)
 }
 
 func verifyRead(path string) error {
