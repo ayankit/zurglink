@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/ayankit/clog"
@@ -46,7 +45,7 @@ func main() {
 		go func(path string) {
 			err := organise.ProcessPath(cfg.SourcePath, cfg.DestPath, path, tmdbClient)
 			if err != nil {
-				log.Printf("Error processing %s: %v", path, err)
+				clog.Error("Error during processing", "path", path, clog.Err(err))
 			}
 		}(req.RelativePath)
 

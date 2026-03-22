@@ -2,10 +2,10 @@ package organise
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
+	"github.com/ayankit/clog"
 	"github.com/ayankit/zurglink/internal/ptn"
 	"github.com/ayankit/zurglink/internal/tmdb"
 )
@@ -22,12 +22,12 @@ func ProcessPath(sourceBase, destBase, relPath string, tmdbClient *tmdb.Client) 
 	if info.IsDir() {
 		return filepath.WalkDir(fullSourcePath, func(path string, d os.DirEntry, err error) error {
 			if err != nil {
-				log.Printf("error walking path %s: %v", path, err)
+				clog.Error("error walking path", "path", path, clog.Err(err))
 				return nil
 			}
 			if !d.IsDir() && ptn.IsVideoFile(path) {
 				if err := processSingleFile(destBase, path, tmdbClient); err != nil {
-					log.Printf("failed to process file %s: %v", path, err)
+					clog.Error("failed to process file", "path", path, clog.Err(err))
 				}
 			}
 			return nil
@@ -38,7 +38,7 @@ func ProcessPath(sourceBase, destBase, relPath string, tmdbClient *tmdb.Client) 
 		return processSingleFile(destBase, fullSourcePath, tmdbClient)
 	}
 
-	log.Printf("skipped non-video file: %s", relPath)
+	clog.Debug("Skipped non-video file", "path", relPath)
 	return nil
 }
 
@@ -101,6 +101,6 @@ func processSingleFile(base, absolutePath string, tmdbClient *tmdb.Client) error
 		return fmt.Errorf("failed to create symlink: %w", err)
 	}
 
-	log.Printf("Successfully organized: %s -> %s", absolutePath, filepath.Base(destFile))
+	clog.Infof("Successfully organized: %s -> %s", absolutePath, filepath.Base(destFile))
 	return nil
 }
