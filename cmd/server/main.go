@@ -44,7 +44,7 @@ func main() {
 
 		// Process asynchronously so we don't block the webhook caller
 		go func(path string) {
-			err := organise.ProcessFile(cfg.SourcePath, cfg.DestPath, path, tmdbClient)
+			err := organise.ProcessPath(cfg.SourcePath, cfg.DestPath, path, tmdbClient)
 			if err != nil {
 				log.Printf("Error processing %s: %v", path, err)
 			}
