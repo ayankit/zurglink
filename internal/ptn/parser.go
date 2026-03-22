@@ -13,7 +13,6 @@ import (
 // TorrentInfo is the resulting structure returned by Parse
 // important, season/episode are 0,0 for movies (so you can't have S00E00 file!)
 type TorrentInfo struct {
-	Original   string `json:"original,omitempty"` // Original file name
 	Title      string `json:"title,omitempty"`
 	Season     int    `json:"season,omitempty"`
 	Episode    int    `json:"episode,omitempty"`
@@ -50,15 +49,15 @@ func (t *TorrentInfo) JSON() (string, error) {
 	return string(s), nil
 }
 
-func setField(tor *TorrentInfo, field, raw, val string) {
+func setField(tor *TorrentInfo, field, val string) {
 	// set the Field by reflecting its info
-	ttor := reflect.TypeOf(tor)
+	ttor := reflect.TypeFor[TorrentInfo]()
 	torV := reflect.ValueOf(tor)
 	//field = strings.Title(field)
 	// Title was deprecated, so need to use cases.
 	caser := cases.Title(language.English)
 	field = caser.String(field)
-	v, _ := ttor.Elem().FieldByName(field)
+	v, _ := ttor.FieldByName(field)
 	//fmt.Printf("    field=%v, type=%+v, value=%v\n", field, v.Type, val)
 	switch v.Type.Kind() {
 	case reflect.Bool:
@@ -78,16 +77,16 @@ func setField(tor *TorrentInfo, field, raw, val string) {
 // algo - remove the file extention if its one of known, then parse the rest
 // the title is the last part.
 func Parse(filename string) (*TorrentInfo, error) {
-	tor := &TorrentInfo{Original: filename}
+	tor := &TorrentInfo{}
 	//fmt.Printf("filename %q\n", filename)
 	var startIndex, endIndex = 0, len(filename)
 	// remove any underline and replace with Spaces
 	cleanName := strings.ReplaceAll(filename, "_", " ")
 	if matches := container.FindAllStringSubmatch(cleanName, -1); len(matches) != 0 {
 		tor.Container = matches[0][1]
-		cleanName = cleanName[0 : len(cleanName)-4]
+		cleanName = cleanName[0 : len(cleanName)-len(matches[0][0])]
 	} else if matches := otherExtensions.FindAllStringSubmatch(cleanName, -1); len(matches) != 0 {
-		cleanName = cleanName[0 : len(cleanName)-4] // remove the . and the extension from the checked strings.
+		cleanName = cleanName[0 : len(cleanName)-len(matches[0][0])] // remove the . and the extension from the checked strings.
 	}
 	// go over all patterns
 	for _, pattern := range patterns {
@@ -114,7 +113,7 @@ func Parse(filename string) (*TorrentInfo, error) {
 			endIndex = len(filename)
 			continue
 		}
-		setField(tor, pattern.name, matches[matchIdx][1], matches[matchIdx][2])
+		setField(tor, pattern.name, matches[matchIdx][2])
 	}
 
 	// Start process for title and remove all dots/underscore from it
@@ -143,7 +142,12 @@ func Parse(filename string) (*TorrentInfo, error) {
 		tor.Country = matches[0][1]
 		cleanName = cleanName[0 : len(cleanName)-3] // remove the coutnry from th name
 	}
-	setField(tor, "title", raw, cleanName)
+	setField(tor, "title", cleanName)
 	tor.IsMovie = tor.Episode == 0 && tor.Season == 0
 	return tor, nil
+}
+
+// IsVideoFile checks if the given filename has an extension that matches a known video container
+func IsVideoFile(filename string) bool {
+	return container.MatchString(filename)
 }
