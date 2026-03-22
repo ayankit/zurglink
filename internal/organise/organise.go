@@ -59,10 +59,11 @@ func (m *Manager) ProcessPath(relativePath string) error {
 				return nil
 			}
 			if !d.IsDir() && ptn.IsVideoFile(path) {
-				if err := m.processSingleFile(path); err != nil {
+				if newPath, err := m.processSingleFile(path); err != nil {
 					clog.Error("failed to process file", "path", path, clog.Err(err))
+				} else {
+					scanPaths = append(scanPaths, newPath)
 				}
-				scanPaths = append(scanPaths, strings.TrimPrefix(path, m.SourcePath))
 			}
 			return nil
 		})
@@ -72,10 +73,11 @@ func (m *Manager) ProcessPath(relativePath string) error {
 	}
 
 	if ptn.IsVideoFile(absolutePath) {
-		if err := m.processSingleFile(absolutePath); err != nil {
+		if newPath, err := m.processSingleFile(absolutePath); err != nil {
 			return err
+		} else {
+			scanPaths = append(scanPaths, newPath)
 		}
-		scanPaths = append(scanPaths, strings.TrimPrefix(absolutePath, m.SourcePath))
 	}
 
 	// Notify jellyfin about changes
@@ -85,19 +87,19 @@ func (m *Manager) ProcessPath(relativePath string) error {
 }
 
 // processSingleFile handles the end-to-end logic for a single video file
-func (m *Manager) processSingleFile(absolutePath string) error {
+func (m *Manager) processSingleFile(absolutePath string) (string, error) {
 	fileName := filepath.Base(absolutePath)
 
 	// 1. Parse raw filename
 	parsed, err := ptn.Parse(fileName)
 	if err != nil {
-		return fmt.Errorf("failed to parse %s: %w", fileName, err)
+		return "", fmt.Errorf("failed to parse %s: %w", fileName, err)
 	}
 
 	// 2. Get Official TMDB Data
 	tmdbData, err := m.tmdb.Search(parsed.Title, parsed.Year, parsed.IsMovie)
 	if err != nil {
-		return fmt.Errorf("tmdb search failed for '%s': %w", parsed.Title, err)
+		return "", fmt.Errorf("tmdb search failed for '%s': %w", parsed.Title, err)
 	}
 
 	// 3. Construct Jellyfin paths
@@ -134,17 +136,17 @@ func (m *Manager) processSingleFile(absolutePath string) error {
 
 	// 4. Create Directory
 	if err := os.MkdirAll(destDir, 0755); err != nil {
-		return fmt.Errorf("failed to create directory %s: %w", destDir, err)
+		return "", fmt.Errorf("failed to create directory %s: %w", destDir, err)
 	}
 
 	// 5. Create Symlink (Remove if exists to overwrite)
 	os.Remove(destFile)
 	if err := os.Symlink(absolutePath, destFile); err != nil {
-		return fmt.Errorf("failed to create symlink: %w", err)
+		return "", fmt.Errorf("failed to create symlink: %w", err)
 	}
 
 	clog.Infof("Successfully organized: %s -> %s", absolutePath, filepath.Base(destFile))
-	return nil
+	return strings.TrimPrefix(destFile, m.DestPath), nil
 }
 
 func (m *Manager) notifyJellyfin(paths []string) {
