@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/ayankit/clog"
 )
@@ -10,22 +11,22 @@ import (
 type AppConfig struct {
 	Port        string
 	TMDBToken   string // TMDB Read Access Token (Bearer)
-	SourcePath  string // The base path where Zurg is mounted
-	DestPath    string // The base path for organized media
 	JFToken     string // The API token from Jellyfin
 	JFServer    string // The address of Jellyfin Server to push on changes
 	JFMountPath string // The base path that is used in Jellyfin Container
+	SourcePath  string // The base path where Zurg is mounted
+	DestPath    string // The base path for organized media
 }
 
 func Load() (*AppConfig, error) {
 	cfg := &AppConfig{
 		Port:        getEnvOrDefault("PORT", "8080"),
 		TMDBToken:   os.Getenv("TMDB_TOKEN"),
-		SourcePath:  os.Getenv("SOURCE_DIR"),
-		DestPath:    os.Getenv("DEST_DIR"),
 		JFToken:     os.Getenv("JF_TOKEN"),
 		JFServer:    os.Getenv("JF_SERVER"),
-		JFMountPath: os.Getenv("JF_MOUNT_DIR"),
+		JFMountPath: filepath.Clean(os.Getenv("JF_MOUNT_DIR")),
+		SourcePath:  filepath.Clean(os.Getenv("SOURCE_DIR")),
+		DestPath:    filepath.Clean(os.Getenv("DEST_DIR")),
 	}
 
 	if cfg.TMDBToken == "" {
