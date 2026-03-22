@@ -38,6 +38,7 @@ func TestProcessPath_SingleMovie(t *testing.T) {
 	sourceDir := filepath.Join(testDir, "source")
 	destDir := filepath.Join(testDir, "dest")
 	os.MkdirAll(sourceDir, 0755)
+	os.MkdirAll(destDir, 0755)
 
 	// Create a dummy video file
 	movieFileName := "Inception.1999.1080p.mkv"
@@ -57,8 +58,13 @@ func TestProcessPath_SingleMovie(t *testing.T) {
 	tmdbClient := tmdb.NewClient("dummy")
 	tmdbClient.HTTPClient = mockTMDBResponse(mockJSON)
 
+	manager, err := NewManager(sourceDir, destDir, tmdbClient, nil)
+	if err != nil {
+		t.Fatalf("Failed to init manager: %v", err)
+	}
+
 	// Run process
-	err := ProcessPath(sourceDir, destDir, movieFileName, tmdbClient)
+	err = manager.ProcessPath(movieFileName)
 	if err != nil {
 		t.Fatalf("ProcessPath failed: %v", err)
 	}
@@ -81,6 +87,7 @@ func TestProcessPath_TVShow(t *testing.T) {
 	sourceDir := filepath.Join(testDir, "source")
 	destDir := filepath.Join(testDir, "dest")
 	os.MkdirAll(sourceDir, 0755)
+	os.MkdirAll(destDir, 0755)
 
 	// Create a dummy video file
 	tvFileName := "Breaking.Bad.S01E01.720p.HDTV.mkv"
@@ -100,8 +107,13 @@ func TestProcessPath_TVShow(t *testing.T) {
 	tmdbClient := tmdb.NewClient("dummy")
 	tmdbClient.HTTPClient = mockTMDBResponse(mockJSON)
 
+	manager, err := NewManager(sourceDir, destDir, tmdbClient, nil)
+	if err != nil {
+		t.Fatalf("Failed to init manager: %v", err)
+	}
+
 	// Run process
-	err := ProcessPath(sourceDir, destDir, tvFileName, tmdbClient)
+	err = manager.ProcessPath(tvFileName)
 	if err != nil {
 		t.Fatalf("ProcessPath failed: %v", err)
 	}
@@ -125,6 +137,7 @@ func TestProcessPath_Directory(t *testing.T) {
 	destDir := filepath.Join(testDir, "dest")
 	showDir := filepath.Join(sourceDir, "MyShow")
 	os.MkdirAll(showDir, 0755)
+	os.MkdirAll(destDir, 0755)
 
 	// Create dummy video files and one non-video file
 	os.WriteFile(filepath.Join(showDir, "MyShow.S02E01.mkv"), []byte("vid1"), 0644)
@@ -144,8 +157,13 @@ func TestProcessPath_Directory(t *testing.T) {
 	tmdbClient := tmdb.NewClient("dummy")
 	tmdbClient.HTTPClient = mockTMDBResponse(mockJSON)
 
+	manager, err := NewManager(sourceDir, destDir, tmdbClient, nil)
+	if err != nil {
+		t.Fatalf("Failed to init manager: %v", err)
+	}
+
 	// Run process on the *directory*
-	err := ProcessPath(sourceDir, destDir, "MyShow", tmdbClient)
+	err = manager.ProcessPath("MyShow")
 	if err != nil {
 		t.Fatalf("ProcessPath failed: %v", err)
 	}
