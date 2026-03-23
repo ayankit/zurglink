@@ -1046,5 +1046,46 @@
       "website": "",
       "ismovie": false
     }
+  },
+  {
+    "fname": "4. The Amazing Spiderman 2012 1080p",
+    "wanted": {
+      "title": "The Amazing Spiderman",
+      "year": 2012,
+      "resolution": "1080p",
+      "ismovie": true
+    }
+  },
+  {
+    "fname": "12. Breaking Bad S01E01 720p HDTV x264",
+    "wanted": {
+      "title": "Breaking Bad",
+      "season": 1,
+      "episode": 1,
+      "resolution": "720p",
+      "quality": "HDTV",
+      "codec": "x264",
+      "ismovie": false
+    }
+  },
+  {
+    "fname": "10 Cloverfield Lane 2016 1080p BluRay",
+    "wanted": {
+      "title": "10 Cloverfield Lane",
+      "year": 2016,
+      "resolution": "1080p",
+      "quality": "BluRay",
+      "ismovie": true
+    }
+  },
+  {
+    "fname": "8 Mile 2002 1080p BluRay",
+    "wanted": {
+      "title": "8 Mile",
+      "year": 2002,
+      "resolution": "1080p",
+      "quality": "BluRay",
+      "ismovie": true
+    }
   }
 ]

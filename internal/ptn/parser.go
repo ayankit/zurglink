@@ -133,11 +133,10 @@ func Parse(filename string) (*TorrentInfo, error) {
 	cleanName = strings.ReplaceAll(cleanName, "_", " ")
 	cleanName = strings.ReplaceAll(cleanName, "  ", " ")
 	cleanName = strings.Trim(cleanName, " -_.^/\\(){}[]")
-	//if strings.ContainsRune(cleanName, '.') && !strings.ContainsRune(cleanName, ' ') {
-	//	cleanName = strings.Replace(cleanName, ".", " ", -1)
-	//}
-	//cleanName = strings.Replace(cleanName, "_", " ", -1)
-	//cleanName = re.sub('([\[\(_]|- )$', '', cleanName).strip()
+
+	// remove known patterns in title
+	cleanName = leadingIndex.ReplaceAllString(cleanName, "")
+
 	if matches := countryre.FindAllStringSubmatch(cleanName, -1); len(matches) != 0 {
 		tor.Country = matches[0][1]
 		cleanName = cleanName[0 : len(cleanName)-3] // remove the coutnry from th name

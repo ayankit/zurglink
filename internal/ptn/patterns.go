@@ -13,6 +13,9 @@ var container = regexp.MustCompile(`(?i)\.(MKV|AVI|MP4|MOV|MPG|MPEG|FLV|F4V|SWF|
 var otherExtensions = regexp.MustCompile(`(?i)\.(SRT|SUB|IDX)$`) // not containers but reasonable to expect
 var countryre = regexp.MustCompile(`\b(US|UK)$`)                 // country name in upper case at the end of the title
 
+// pattern to remove from title
+var leadingIndex = regexp.MustCompile(`^\d{1,2}\.\s+`)
+
 var patterns = []struct {
 	name string
 	// Use the last matching pattern. E.g. Year.
