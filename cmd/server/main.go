@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/ayankit/clog"
 	"github.com/ayankit/zurglink/internal/config"
@@ -54,12 +55,7 @@ func main() {
 		}
 
 		// Process asynchronously so we don't block the webhook caller
-		go func(path string) {
-			err := manager.ProcessPath(path)
-			if err != nil {
-				clog.Error("Error during processing", "path", path, clog.Err(err))
-			}
-		}(req.Path)
+		go processWithRetry(req.Path, manager, 3)
 
 		w.WriteHeader(http.StatusAccepted)
 		w.Write([]byte("Processing started"))
@@ -71,4 +67,27 @@ func main() {
 	if err := http.ListenAndServe(":"+cfg.Port, nil); err != nil {
 		clog.Fatal("Server failed to start", clog.Err(err))
 	}
+}
+
+// processWithRetry attempts to process a path with exponential backoff on failure.
+func processWithRetry(path string, manager *organise.Manager, maxRetries int) {
+	var err error
+	delay := time.Second
+
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		err = manager.ProcessPath(path)
+		if err == nil {
+			// Success
+			return
+		}
+
+		if attempt < maxRetries {
+			clog.Warn("Process failed, retrying...", "path", path, "attempt", attempt, "next_delay", delay.String(), clog.Err(err))
+			time.Sleep(delay)
+			delay *= 2 // Exponential backoff
+		}
+	}
+
+	// All retries exhausted
+	clog.Error("Failed to process path after retries", "path", path, "retries", maxRetries, clog.Err(err))
 }
