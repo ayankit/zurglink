@@ -72,7 +72,7 @@ func main() {
 // processWithRetry attempts to process a path with exponential backoff on failure.
 func processWithRetry(path string, manager *organise.Manager, maxRetries int) {
 	var err error
-	delay := time.Second
+	delay := 2 * time.Second
 
 	for attempt := 1; attempt <= maxRetries; attempt++ {
 		err = manager.ProcessPath(path)
